@@ -4,48 +4,7 @@
 * 		Allow you to permanently remove a player's ability to use the in-game spray function
 * 
 * 	VERSIONS and ChangeLog
-* 
-* 		0.0.1.0	*	Initial Beta Release
-* 
-* 		0.0.2.0	*	Added sm_banspray_list for admins to check if anyone connected to the server is banned
-* 					from using sprays
-* 
-* 		0.0.3.0	+	Added CVar to allow or restrict sprays before client(s) authorized
-* 				+	Added ability to remove any sprays a player sprayed if they're banned.
-* 
-* 		0.0.3.1	+	Added option to turn on spray tracing so when aiming at spray it will display who sprayed it
-* 					including their name, steamID, and time sprayed.  All controlled with CVars.
-* 
-* 		0.0.3.2	+	Added command "sm_removespray" to remove spray without banning sprays.  Either aim at a spray
-* 					and use the command or provide a player's name and the spray will be removed.
-* 
-* 		0.0.3.3	*	Changed command from sm_removespray to sm_deletespray
-* 
-* 		0.0.3.4	+	Added command to perform offline spray bans with SteamID sm_banspray_steamid
-* 				*	Switched from colors.inc to morecolors.inc
-* 				+	Added lateload function
-* 				+	Added translation file for phrases
-* 				+	Added REGEX to validate SteamID
-* 		
-* 		0.0.3.5	+	Added Updater functionality
-* 				+	Added AutoExecConfig include
-* 
-* 		0.0.3.6	+	Added LogAction stuff
-* 
-* 		0.0.3.7	+	Added spray protection (code credit to MasterOfTheXP) (https://forums.alliedmods.net/member.php?u=152150)
-* 
-* 		0.0.3.8	*	Fixed CVar description for sm_bannedsprays_version
-* 
-* 	TO DO List
-* 		*	[DONE] Add menu for admins to use and a menu for players to be able to view if they're
-* 			on the ban list or not
-* 		*	Switch from using ClientPrefs to using SQL
-* 
-* 	KNOWN ISSUES
-* 		None that I could find during my testing
-* 
-* 	REQUESTS
-* 		Suggest something
+*       * See CHANGELOG.md 
 * 
 * 	CREDITS
 * 		Credit for some of the code goes to the author(s) of SprayTracer (https://forums.alliedmods.net/showthread.php?t=75480)
@@ -58,12 +17,9 @@
 #include <sdktools>
 #include <morecolors>
 #include <regex>
-#include <autoexecconfig>
 #undef REQUIRE_PLUGIN
-#include <updater>
 
-#define 	PLUGIN_VERSION 		"0.0.3.8"
-#define 	UPDATE_URL 			"http://dl.dropbox.com/u/3266762/ban_player_sprays.txt"
+#define 	PLUGIN_VERSION 		"0.4.0"
 #define 	REGEX_STRING 		"^STEAM_[0-5]:[01]:\\d+$"
 
 new g_BanSprayTarget[MAXPLAYERS+1];
@@ -93,14 +49,13 @@ new Float:SprayTime[MAXPLAYERS+1];
 new Float:vectorPos[3];
 new bool:lateLoad;
 new Handle:g_regSteamID = INVALID_HANDLE;
-new bool:UseUpdater;
 new SprayProtection;
 new WarnType;
 
 public Plugin:myinfo =
 {
 	name = "Banned Sprays",
-	author = "TnTSCS aka ClarkKent",
+	author = "TnTSCS aka ClarkKent, X8ETr1x",
 	description = "Permanently remove a player's ability to use sprays",
 	version = PLUGIN_VERSION,
 	url = "http://www.sourcemod.net"
@@ -109,69 +64,63 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	new bool:appended;
-	AutoExecConfig_SetFile("plugin.ban_player_sprays");
 	
-	new Handle:hRandom; //KyleS HATES Handles
+	new Handle:hRandom;
 	
 	HookConVarChange((CreateConVar("sm_bannedsprays_version", PLUGIN_VERSION, 
 	"The version of Banned Sprays", FCVAR_PLUGIN | FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD)), OnVersionChanged);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_remove", "1", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_remove", "1", 
 	"Remove the player's spray after they are banned from using sprays?\n0 = Leave Spray\n1 = Remove Spray")), OnRemoveSprayChanged);
 	RemoveSprayOnBan = GetConVarBool(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_auth", "0", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_auth", "0", 
 	"If player's SteamID hasn't been authenticated yet, restrict sprays?\n0 = No, allow\n1 = Yes Do Not Allow")), OnAuthenticationChanged);
 	AllowSpraysBeforeAuthentication = GetConVarBool(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_tmploc", "0.00 0.00 0.00", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tmploc", "0.00 0.00 0.00", 
 	"Location for sprays to be moved to.\nMust have 2+ decimal places to be valid")), OnTempLocChanged);
 	GetConVarString(hRandom, TmpLoc, sizeof(TmpLoc));
 	StringToVector(TmpLoc, vecTempLoc);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_debug", "0", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_debug", "0", 
 	"Enable some debug logging?\n0 = No\n1 = Yes")), OnDebugChanged);
 	Debug = GetConVarBool(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_trace", "1", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_trace", "1", 
 	"Trace all player sprays to display info when aimed at?\n0 = No\n1 = Yes")), OnTraceChanged);
 	TraceSprays = GetConVarBool(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_tracerate", "3.0", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tracerate", "3.0", 
 	"Rate at which to check all player sprays (in seconds)", _, true, 1.0)), OnTraceRateChanged);
 	TraceRate = GetConVarFloat(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_tracedist", "25.0", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tracedist", "25.0", 
 	"How far away the spray is from the aim to be traced", _, true, 1.0, true, 250.0)), OnTraceDistChanged);
 	TraceDistance = GetConVarFloat(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_display", "4", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_display", "4", 
 	"Display Options (add them up and put total in CVar)\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0)), OnDisplayChanged);
 	DisplayType = GetConVarInt(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_protection", "0", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_protection", "0", 
 	"Distance, in hammer units, to not allow another user to spray next to a user's current spray\n0 = DISABLED\n>0 = Distance to protect sprays", _, true, 0.0, true, 1000.0)), OnProtectionChanged);
 	SprayProtection = GetConVarInt(hRandom);
 	SetAppend(appended);
 	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_warntype", "2", 
+	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_warntype", "2", 
 	"Display Options (add them up and put total in CVar) for warning players when they try to spray over another player's spray\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0)), OnWarnTypeChanged);
 	WarnType = GetConVarInt(hRandom);
 	SetAppend(appended);
-	
-	HookConVarChange((hRandom = AutoExecConfig_CreateConVar("sm_bannedsprays_update", "0", 
-	"Use Updater to update this plugin when updates are available?\n0 = No\n1 = Yes")), OnUpdateChanged);
-	UseUpdater = GetConVarBool(hRandom);
-	SetAppend(appended);
-	
+
 	AddTempEntHook("Player Decal", PlayerSpray);
 	
 	SetCookieMenuItem(Menu_Status, 0, "Display Banned Spray Status");
@@ -197,12 +146,6 @@ public OnPluginStart()
 	}
 	
 	AutoExecConfig(true, "plugin.ban_player_sprays");
-	
-	// Cleaning is an expensive operation and should be done at the end
-	if (appended)
-	{
-		AutoExecConfig_CleanFile();
-	}
 	
 	if (lateLoad)
 	{
@@ -254,14 +197,6 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
  *
  * @param name			Library name.
  */
-public OnLibraryAdded(const String:name[])
-{
-	// Check if plugin Updater exists, if it does, add this plugin to its list of managed plugins
-	if (UseUpdater && StrEqual(name, "updater"))
-	{
-		Updater_AddPlugin(UPDATE_URL);
-	}
-}
 
 /**
  * Called right before a library is removed that the current plugin references 
@@ -311,14 +246,6 @@ public Updater_OnPluginUpdated()
  *
  * @noreturn
  */
-public OnConfigsExecuted()
-{
-	// Check if plugin Updater exists, if it does, add this plugin to its list of managed plugins
-	if (UseUpdater && LibraryExists("updater"))
-	{
-		Updater_AddPlugin(UPDATE_URL);
-	}
-}
 
 /**
  * Called once a client is authorized and fully in-game, and 
@@ -1335,11 +1262,6 @@ public OnDisplayChanged(Handle:cvar, const String:oldVal[], const String:newVal[
 public OnTraceDistChanged(Handle:cvar, const String:oldVal[], const String:newVal[])
 {
 	TraceDistance = GetConVarFloat(cvar);
-}
-
-public OnUpdateChanged(Handle:cvar, const String:oldVal[], const String:newVal[])
-{
-	UseUpdater = GetConVarBool(cvar);
 }
 
 public OnProtectionChanged(Handle:cvar, const String:oldVal[], const String:newVal[])
