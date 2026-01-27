@@ -19,7 +19,7 @@
 #include <regex>
 #undef REQUIRE_PLUGIN
 
-#define 	PLUGIN_VERSION 		"0.4.2"
+#define 	PLUGIN_VERSION 		"0.4.3"
 #define 	REGEX_STRING 		"^STEAM_[0-5]:[01]:\\d+$"
 #define     TMP_LOC_LENGTH      30
 
@@ -472,7 +472,7 @@ public Action:PlayerSpray(const String:te_name[], const clients[], client_count,
 			Format(SprayerName[client], sizeof(SprayerName[]), "Unk Name");
 		}
 		
-		if (!GetClientAuthString(client, SprayerID[client], sizeof(SprayerID[])))
+		if (!GetClientAuthId(client, AuthId_Steam2, SprayerID[client], sizeof(SprayerID[])))
 		{
 			Format(SprayerID[client], sizeof(SprayerID[]), "Unk SteamID");
 		}
