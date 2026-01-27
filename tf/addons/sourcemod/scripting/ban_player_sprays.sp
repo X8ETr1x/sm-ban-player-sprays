@@ -19,8 +19,9 @@
 #include <regex>
 #undef REQUIRE_PLUGIN
 
-#define 	PLUGIN_VERSION 		"0.4.1"
+#define 	PLUGIN_VERSION 		"0.4.2"
 #define 	REGEX_STRING 		"^STEAM_[0-5]:[01]:\\d+$"
+#define     TMP_LOC_LENGTH      30
 
 new g_BanSprayTarget[MAXPLAYERS+1];
 new bool:PlayerCanSpray[MAXPLAYERS+1] = {false, ...};
@@ -33,7 +34,7 @@ new bool:AllowSpraysBeforeAuthentication;
 new Handle:g_cookie;
 new Handle:g_adminMenu = INVALID_HANDLE;
 
-new String:TmpLoc[30];
+new String:TmpLoc[TMP_LOC_LENGTH];
 new Float:vecTempLoc[3];
 
 new bool:CanViewSprayInfo[MAXPLAYERS+1];
@@ -695,9 +696,9 @@ StringToVector(String:str[], Float:vector[3])
 {
 	new String:t_str[3][20];
 	
-	ReplaceString(str, sizeof(str[]), ",", " ", false);
-	ReplaceString(str, sizeof(str[]), ";", " ", false);
-	ReplaceString(str, sizeof(str[]), "  ", " ", false);
+	ReplaceString(str, TMP_LOC_LENGTH, ",", " ", false);
+	ReplaceString(str, TMP_LOC_LENGTH, ";", " ", false);
+	ReplaceString(str, TMP_LOC_LENGTH, "  ", " ", false);
 	TrimString(str);
 	
 	ExplodeString(str, " ", t_str, sizeof(t_str), sizeof(t_str[]));
@@ -1198,7 +1199,7 @@ public OnAuthenticationChanged(Handle:cvar, const String:oldVal[], const String:
 
 public OnTempLocChanged(Handle:cvar, const String:oldVal[], const String:newVal[])
 {
-	GetConVarString(cvar, TmpLoc, sizeof(TmpLoc));
+	GetConVarString(cvar, TmpLoc, TMP_LOC_LENGTH);
 	StringToVector(TmpLoc, vecTempLoc);
 }
 
