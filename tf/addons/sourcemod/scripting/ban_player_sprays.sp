@@ -20,7 +20,7 @@
 #include <regex>
 #undef REQUIRE_PLUGIN
 
-#define 	PLUGIN_VERSION 		"0.5.0"
+#define     PLUGIN_VERSION 	"0.5.1"
 #define     TMP_LOC_LENGTH      30
 
 char g_BanSprayTarget[MAXPLAYERS+1];
@@ -167,7 +167,7 @@ public void OnPluginStart()
  * @param err_max	Maximum number of characters for error message buffer.
  * @return		APLRes_Success for load success, APLRes_Failure or APLRes_SilentFailure otherwise
  */
-public APLRes AskPluginLoad2(Handle myself, bool late, char error[], int err_max)
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	lateLoad = late;
 	return APLRes_Success;
@@ -188,7 +188,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char error[], int err_max
  *
  * @param name			Library name.
  */
-public void OnLibraryRemoved(const char name[])
+public void OnLibraryRemoved(const char[] name)
 {
 	if (StrEqual(name, "adminmenu"))
 	{
@@ -391,7 +391,7 @@ bool PlayerSprayIsBanned(int client)
 	return false;
 }
 
-public Action PlayerSpray(const char te_name[], const char clients[], int client_count, float delay)
+public Action PlayerSpray(const char[] te_name, const char[] clients, int client_count, float delay)
 {
 	int client = TE_ReadNum("m_nPlayer");
 	
@@ -688,7 +688,7 @@ public void ResetVariables(int client)
  * @param vector			Vector to store the converted string to vector
  * @return			True on success, false on failure
  */
-char StringToVector(char str[], float vector[3])
+char StringToVector(char[] str, float vector[3])
 {
 	char t_str[3][20];
 	
@@ -929,7 +929,7 @@ public void OnAdminMenuReady(Handle topmenu)
 	AddToTopMenu(g_adminMenu, "sm_banspray", TopMenuObject_Item, AdminMenu_BanSpray, player_commands, "sm_banspray", ADMFLAG_BAN);
 }
 
-public void Menu_Status(int client, CookieMenuAction action, any info, char buffer[], int maxlen)
+public void Menu_Status(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
 {
 	if (action == CookieMenuAction_DisplayOption)
 	{
@@ -941,7 +941,7 @@ public void Menu_Status(int client, CookieMenuAction action, any info, char buff
 	}
 }
 
-public void AdminMenu_BanSpray(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param,  char buffer[], int maxlength)
+public void AdminMenu_BanSpray(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param,  char[] buffer, int maxlength)
 {
 	switch (action)
 	{
@@ -1145,7 +1145,7 @@ public void Menu_StatusDisplay(Handle menu, MenuAction action, int param1, int p
  * @param ...			Variable number of format parameters.
  * @return				True on success, false if this usermessage doesn't exist.
  */
-bool Client_PrintKeyHintText(int client, const char format[], any value)
+bool Client_PrintKeyHintText(int client, const char[] format, any value)
 {
 	Handle userMessage = StartMessageOne("KeyHintText", client);
 	
@@ -1175,7 +1175,7 @@ bool Client_PrintKeyHintText(int client, const char format[], any value)
 }
 
 
-public void OnVersionChanged(Handle cvar, const char oldValue[], const char newValue[])
+public void OnVersionChanged(Handle cvar, const char[] oldValue, const char[] newValue)
 {
 	if (!StrEqual(newValue, PLUGIN_VERSION))
 	{
@@ -1183,28 +1183,28 @@ public void OnVersionChanged(Handle cvar, const char oldValue[], const char newV
 	}
 }
 
-public void OnRemoveSprayChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnRemoveSprayChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	RemoveSprayOnBan = GetConVarBool(cvar);
 }
 
-public void OnAuthenticationChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnAuthenticationChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	AllowSpraysBeforeAuthentication = GetConVarBool(cvar);
 }
 
-public void OnTempLocChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnTempLocChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	GetConVarString(cvar, TmpLoc, TMP_LOC_LENGTH);
 	StringToVector(TmpLoc, vecTempLoc);
 }
 
-public void OnDebugChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnDebugChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	Debug = GetConVarBool(cvar);
 }
 
-public void OnTraceChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnTraceChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	TraceSprays = GetConVarBool(cvar);
 	
@@ -1216,7 +1216,7 @@ public void OnTraceChanged(Handle cvar, const char oldVal[], const char newVal[]
 	}
 }
 
-public void OnTraceRateChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnTraceRateChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	TraceRate = GetConVarFloat(cvar);
 	
@@ -1225,22 +1225,22 @@ public void OnTraceRateChanged(Handle cvar, const char oldVal[], const char newV
 	g_TraceTimer = CreateTimer(TraceRate, TraceAllSprays, _, TIMER_REPEAT);
 }
 
-public void OnDisplayChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnDisplayChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	DisplayType = GetConVarInt(cvar);
 }
 
-public void OnTraceDistChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnTraceDistChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	TraceDistance = GetConVarFloat(cvar);
 }
 
-public void OnProtectionChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnProtectionChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	SprayProtection = GetConVarInt(cvar);
 }
 
-public void OnWarnTypeChanged(Handle cvar, const char oldVal[], const char newVal[])
+public void OnWarnTypeChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
 	WarnType = GetConVarInt(cvar);
 }
