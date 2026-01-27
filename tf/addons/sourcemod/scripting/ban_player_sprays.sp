@@ -19,7 +19,7 @@
 #include <regex>
 #undef REQUIRE_PLUGIN
 
-#define 	PLUGIN_VERSION 		"0.4.0"
+#define 	PLUGIN_VERSION 		"0.4.1"
 #define 	REGEX_STRING 		"^STEAM_[0-5]:[01]:\\d+$"
 
 new g_BanSprayTarget[MAXPLAYERS+1];
@@ -63,8 +63,6 @@ public Plugin:myinfo =
 
 public OnPluginStart()
 {
-	new bool:appended;
-	
 	new Handle:hRandom;
 	
 	HookConVarChange((CreateConVar("sm_bannedsprays_version", PLUGIN_VERSION, 
@@ -73,54 +71,44 @@ public OnPluginStart()
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_remove", "1", 
 	"Remove the player's spray after they are banned from using sprays?\n0 = Leave Spray\n1 = Remove Spray")), OnRemoveSprayChanged);
 	RemoveSprayOnBan = GetConVarBool(hRandom);
-	SetAppend(appended);
 	
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_auth", "0", 
 	"If player's SteamID hasn't been authenticated yet, restrict sprays?\n0 = No, allow\n1 = Yes Do Not Allow")), OnAuthenticationChanged);
 	AllowSpraysBeforeAuthentication = GetConVarBool(hRandom);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tmploc", "0.00 0.00 0.00", 
 	"Location for sprays to be moved to.\nMust have 2+ decimal places to be valid")), OnTempLocChanged);
 	GetConVarString(hRandom, TmpLoc, sizeof(TmpLoc));
 	StringToVector(TmpLoc, vecTempLoc);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_debug", "0", 
 	"Enable some debug logging?\n0 = No\n1 = Yes")), OnDebugChanged);
 	Debug = GetConVarBool(hRandom);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_trace", "1", 
 	"Trace all player sprays to display info when aimed at?\n0 = No\n1 = Yes")), OnTraceChanged);
 	TraceSprays = GetConVarBool(hRandom);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tracerate", "3.0", 
 	"Rate at which to check all player sprays (in seconds)", _, true, 1.0)), OnTraceRateChanged);
 	TraceRate = GetConVarFloat(hRandom);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tracedist", "25.0", 
 	"How far away the spray is from the aim to be traced", _, true, 1.0, true, 250.0)), OnTraceDistChanged);
 	TraceDistance = GetConVarFloat(hRandom);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_display", "4", 
 	"Display Options (add them up and put total in CVar)\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0)), OnDisplayChanged);
 	DisplayType = GetConVarInt(hRandom);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_protection", "0", 
 	"Distance, in hammer units, to not allow another user to spray next to a user's current spray\n0 = DISABLED\n>0 = Distance to protect sprays", _, true, 0.0, true, 1000.0)), OnProtectionChanged);
 	SprayProtection = GetConVarInt(hRandom);
-	SetAppend(appended);
-	
+		
 	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_warntype", "2", 
 	"Display Options (add them up and put total in CVar) for warning players when they try to spray over another player's spray\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0)), OnWarnTypeChanged);
 	WarnType = GetConVarInt(hRandom);
-	SetAppend(appended);
-
+	
 	AddTempEntHook("Player Decal", PlayerSpray);
 	
 	SetCookieMenuItem(Menu_Status, 0, "Display Banned Spray Status");
@@ -229,12 +217,6 @@ public Action:Updater_OnPluginDownloading()
  *
  * @noreturn
  */
-public Updater_OnPluginUpdated()
-{
-	LogMessage("...:: Ban Spray is finished updating, reloading plugin now ::...");
-	
-	ReloadPlugin(INVALID_HANDLE);
-}
 
 /**
  * Called when the map has loaded, servercfgfile (server.cfg) has been 
@@ -1150,14 +1132,6 @@ public Menu_StatusDisplay(Handle:menu, MenuAction:action, param1, param2)
 		{
 			CloseHandle(menu);
 		}
-	}
-}
-
-SetAppend(&appended)
-{
-	if (AutoExecConfig_GetAppendResult() == AUTOEXEC_APPEND_SUCCESS)
-	{
-		appended = true;
 	}
 }
 
