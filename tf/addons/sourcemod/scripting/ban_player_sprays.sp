@@ -19,8 +19,7 @@
 #include <regex>
 #undef REQUIRE_PLUGIN
 
-#define 	PLUGIN_VERSION 		"0.4.3"
-#define 	REGEX_STRING 		"^STEAM_[0-5]:[01]:\\d+$"
+#define 	PLUGIN_VERSION 		"0.4.4"
 #define     TMP_LOC_LENGTH      30
 
 new g_BanSprayTarget[MAXPLAYERS+1];
@@ -472,7 +471,7 @@ public Action:PlayerSpray(const String:te_name[], const clients[], client_count,
 			Format(SprayerName[client], sizeof(SprayerName[]), "Unk Name");
 		}
 		
-		if (!GetClientAuthId(client, AuthId_Steam2, SprayerID[client], sizeof(SprayerID[])))
+		if (!GetClientAuthId(client, AuthId_SteamID64, SprayerID[client], sizeof(SprayerID[])))
 		{
 			Format(SprayerID[client], sizeof(SprayerID[]), "Unk SteamID");
 		}
@@ -748,12 +747,12 @@ public Action:Command_BanSpraySteamID(client, args)
 {
 	if (args < 2)
 	{
-		ReplyToCommand(client, "[Ban Spray] Usage: sm_banspray_steamid <steamid> <1/0>");
+		ReplyToCommand(client, "[Ban Spray] Usage: sm_banspray_steamid <SteamID64> <1/0>");
 		return Plugin_Handled;
 	}
 	
 	new String:arg_string[256];
-	new String:authid[25];
+	new String:authid[17];
 	new String:yesno[10];
 	
 	GetCmdArgString(arg_string, sizeof(arg_string));
@@ -767,10 +766,9 @@ public Action:Command_BanSpraySteamID(client, args)
 	}
 	
 	// Validate SteamID
-	new match = MatchRegex(g_regSteamID, authid);
-	if (match <= 0)
+	if (strlen(authid) != -1)
 	{
-		ReplyToCommand(client, "[Ban Spray] Invalid SteamID format, must be in format: STEAM_#:#:####");
+		ReplyToCommand(client, "[Ban Spray] Invalid SteamID format, must be in SteamID64 format.");
 		return Plugin_Handled;
 	}
 	
