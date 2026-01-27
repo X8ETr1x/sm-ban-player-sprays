@@ -19,10 +19,10 @@
 #include <regex>
 #undef REQUIRE_PLUGIN
 
-#define 	PLUGIN_VERSION 		"0.4.4"
+#define 	PLUGIN_VERSION 		"0.4.5"
 #define     TMP_LOC_LENGTH      30
 
-new g_BanSprayTarget[MAXPLAYERS+1];
+char g_BanSprayTarget[MAXPLAYERS+1];
 new bool:PlayerCanSpray[MAXPLAYERS+1] = {false, ...};
 new bool:PlayerCachedCookie[MAXPLAYERS+1] = {false, ...};
 
@@ -48,7 +48,6 @@ new String:SprayerID[MAXPLAYERS+1][32];
 new Float:SprayTime[MAXPLAYERS+1];
 new Float:vectorPos[3];
 new bool:lateLoad;
-new Handle:g_regSteamID = INVALID_HANDLE;
 new SprayProtection;
 new WarnType;
 
@@ -144,12 +143,6 @@ public OnPluginStart()
 				OnClientPostAdminCheck(i);
 			}
 		}
-	}
-	
-	g_regSteamID = CompileRegex(REGEX_STRING, PCRE_CASELESS);
-	if (g_regSteamID == INVALID_HANDLE)
-	{
-		SetFailState("Unable to setup regex expression [%s] for validating SteamID", REGEX_STRING);
 	}
 }
 
