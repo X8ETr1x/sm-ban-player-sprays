@@ -19,7 +19,7 @@
 #include <regex>
 #undef REQUIRE_PLUGIN
 
-#define 	PLUGIN_VERSION 		"0.4.5"
+#define 	PLUGIN_VERSION 		"0.4.6"
 #define     TMP_LOC_LENGTH      30
 
 char g_BanSprayTarget[MAXPLAYERS+1];
@@ -67,45 +67,45 @@ public OnPluginStart()
 	HookConVarChange((CreateConVar("sm_bannedsprays_version", PLUGIN_VERSION, 
 	"The version of Banned Sprays", FCVAR_PLUGIN | FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD)), OnVersionChanged);
 	
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_remove", "1", 
-	"Remove the player's spray after they are banned from using sprays?\n0 = Leave Spray\n1 = Remove Spray")), OnRemoveSprayChanged);
+	hRandom = CreateConVar("sm_bannedsprays_remove", "1", "Remove the player's spray after they are banned from using sprays?\n0 = Leave Spray\n1 = Remove Spray");
+	HookConVarChange(hRandom, OnRemoveSprayChanged);
 	RemoveSprayOnBan = GetConVarBool(hRandom);
-	
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_auth", "0", 
-	"If player's SteamID hasn't been authenticated yet, restrict sprays?\n0 = No, allow\n1 = Yes Do Not Allow")), OnAuthenticationChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_auth", "0", "If player's SteamID hasn't been authenticated yet, restrict sprays?\n0 = No, allow\n1 = Yes Do Not Allow");
+	HookConVarChange(hRandom, OnAuthenticationChanged);
 	AllowSpraysBeforeAuthentication = GetConVarBool(hRandom);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tmploc", "0.00 0.00 0.00", 
-	"Location for sprays to be moved to.\nMust have 2+ decimal places to be valid")), OnTempLocChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_tmploc", "0.00 0.00 0.00", "Location for sprays to be moved to.\nMust have 2+ decimal places to be valid");
+	HookConVarChange(hRandom, OnTempLocChanged);
 	GetConVarString(hRandom, TmpLoc, sizeof(TmpLoc));
 	StringToVector(TmpLoc, vecTempLoc);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_debug", "0", 
-	"Enable some debug logging?\n0 = No\n1 = Yes")), OnDebugChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_debug", "0", "Enable some debug logging?\n0 = No\n1 = Yes");
+	HookConVarChange(hRandom, OnDebugChanged);
 	Debug = GetConVarBool(hRandom);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_trace", "1", 
-	"Trace all player sprays to display info when aimed at?\n0 = No\n1 = Yes")), OnTraceChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_trace", "1", "Trace all player sprays to display info when aimed at?\n0 = No\n1 = Yes");
+	HookConVarChange(hRandom, OnTraceChanged);
 	TraceSprays = GetConVarBool(hRandom);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tracerate", "3.0", 
-	"Rate at which to check all player sprays (in seconds)", _, true, 1.0)), OnTraceRateChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_tracerate", "3.0", "Rate at which to check all player sprays (in seconds)", _, true, 1.0);
+	HookConVarChange(hRandom, OnTraceRateChanged);
 	TraceRate = GetConVarFloat(hRandom);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_tracedist", "25.0", 
-	"How far away the spray is from the aim to be traced", _, true, 1.0, true, 250.0)), OnTraceDistChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_tracedist", "25.0", "How far away the spray is from the aim to be traced", _, true, 1.0, true, 250.0);
+	HookConVarChange(hRandom, OnTraceDistChanged);
 	TraceDistance = GetConVarFloat(hRandom);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_display", "4", 
-	"Display Options (add them up and put total in CVar)\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0)), OnDisplayChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_display", "4", "Display Options (add them up and put total in CVar)\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0);
+	HookConVarChange(hRandom, OnDisplayChanged);
 	DisplayType = GetConVarInt(hRandom);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_protection", "0", 
-	"Distance, in hammer units, to not allow another user to spray next to a user's current spray\n0 = DISABLED\n>0 = Distance to protect sprays", _, true, 0.0, true, 1000.0)), OnProtectionChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_protection", "0", "Distance, in hammer units, to not allow another user to spray next to a user's current spray\n0 = DISABLED\n>0 = Distance to protect sprays", _, true, 0.0, true, 1000.0);
+	HookConVarChange(hRandom, OnProtectionChanged);
 	SprayProtection = GetConVarInt(hRandom);
-		
-	HookConVarChange((hRandom = CreateConVar("sm_bannedsprays_warntype", "2", 
-	"Display Options (add them up and put total in CVar) for warning players when they try to spray over another player's spray\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0)), OnWarnTypeChanged);
+
+	hRandom = CreateConVar("sm_bannedsprays_warntype", "2", "Display Options (add them up and put total in CVar) for warning players when they try to spray over another player's spray\n1 = CenterText\n2 = HintText\n4 = HudHintText", _, true, 1.0, true, 7.0);
+	HookConVarChange(hRandom, OnWarnTypeChanged);
 	WarnType = GetConVarInt(hRandom);
 	
 	AddTempEntHook("Player Decal", PlayerSpray);
