@@ -1,0 +1,1 @@
+# sm-ban-player-sprays
