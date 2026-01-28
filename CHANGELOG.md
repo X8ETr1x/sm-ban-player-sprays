@@ -1,3 +1,9 @@
+## [0.4.0] 2026-01-27
+
+### Removed
+
+- Includes autoexecconfig and updater.
+
 ## [0.3.8] 2015-01-21
 
 ### Fixed
