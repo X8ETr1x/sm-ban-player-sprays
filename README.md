@@ -1,5 +1,7 @@
 # SourceMod: Ban Player Sprays
 
+A fork of [TnTSCS's plugin](https://forums.alliedmods.net/showthread.php?t=195096).
+
 This plugin will give admins the ability to permanently ban a player's ability to use the in-game spray function. Once banned, a player will not be able to spray anymore until an admin unbans them.
 
 Admin can also view the ban list of currently connected players. Players can also view a menu to check the status of their spray ban status.
