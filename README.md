@@ -78,4 +78,8 @@ Must have 2+ decimal places to be valid
 
 ## Installation
 
+### Dependencies
+
+- [More Colors](https://forums.alliedmods.net/showthread.php?t=185016)
+
 For now, just drop the .smx in your sourcemod/plugins folder. I will be adding a translation file later on so this can get approved. I wasn't planning on releasing this plugin, but I've seen a few requests for it lately.I've updated this plugin as of 0.0.3.4 to have a translation file, make sure you place that in your translations folder. 

@@ -1,3 +1,74 @@
+## [0.5.3] 2026-01-28
+
+### Fixed
+
+- A bug where the Steam ID was cut off by one character.
+
+## [0.5.2] 2026-01-28
+
+### Changed
+
+- Updated plugin information.
+- Removed unused code.
+
+### Fixed
+
+- Fixed multiple prototype mismatch errors.
+
+## [0.5.1] 2026-01-27
+
+### Changed
+
+- Updated to new indeterminate array syntax.
+
+## [0.5.0] 2026-01-27
+
+### Changed
+
+- Updated code to transitional syntax.
+
+## [0.4.6] 2026-01-27
+
+### Changed
+
+- Cleaned up CVars for readability.
+
+## [0.4.5] 2026-01-27
+
+### Removed
+
+- Old regex for Steam2 AuthId.
+
+## [0.4.4] 2026-01-27
+
+### Changed
+
+- Changed AuthID verification to SteamID64.
+
+## [0.4.3] 2026-01-27
+
+### Changed
+
+- Replaced deprecated GetClientAuthString
+
+## [0.4.2] 2026-01-27
+
+### Fixed
+
+- Fixed array length logic error.
+
+## [0.4.1] 2026-01-27
+
+### Removed
+
+- Additional unused code.
+
+## [0.4.0] 2026-01-27
+
+### Removed
+
+- Includes autoexecconfig and updater.
+
 ## [0.3.8] 2015-01-21
 
 ### Fixed
