@@ -21,7 +21,7 @@
 #include <regex>
 
 #undef      REQUIRE_PLUGIN
-#define     PLUGIN_VERSION 	"0.5.2"
+#define     PLUGIN_VERSION 	"0.5.3"
 
 bool AllowSpraysBeforeAuthentication;
 bool CanViewSprayInfo[MAXPLAYERS+1];
@@ -737,10 +737,11 @@ public Action Command_BanSpraySteamID(int client, int args)
 	}
 	
 	char arg_string[256];
-	char authid[17];
+	char authid[18];
 	char yesno[10];
 	
 	GetCmdArgString(arg_string, sizeof(arg_string));
+	
 	
 	int len;
 	int total_len;
@@ -751,8 +752,11 @@ public Action Command_BanSpraySteamID(int client, int args)
 		total_len += len;
 	}
 	
+
 	// Validate SteamID
-	if (strlen(authid) != -1)
+	char steamid_regex[10] = "[0-9]{17}";
+	Handle steamid_regex_cmp = CompileRegex(steamid_regex, PCRE_CASELESS);
+	if (MatchRegex(steamid_regex_cmp, authid) != 1)
 	{
 		ReplyToCommand(client, "[Ban Spray] Invalid SteamID format, must be in SteamID64 format.");
 		return Plugin_Handled;
