@@ -1,6 +1,6 @@
 ## [0.5.2] 2026-01-28
 
-## Changed
+### Changed
 
 - Updated plugin information.
 - Removed unused code.
