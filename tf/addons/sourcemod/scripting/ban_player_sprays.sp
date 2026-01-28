@@ -12,61 +12,55 @@
 
 #pragma semicolon 1
 #pragma newdecls required
+
 #include <sourcemod>
 #include <adminmenu>
 #include <clientprefs>
 #include <sdktools>
 #include <morecolors>
 #include <regex>
-#undef REQUIRE_PLUGIN
 
-#define     PLUGIN_VERSION 	"0.5.1"
-#define     TMP_LOC_LENGTH      30
+#undef      REQUIRE_PLUGIN
+#define     PLUGIN_VERSION 	"0.5.2"
 
-char g_BanSprayTarget[MAXPLAYERS+1];
-bool PlayerCanSpray[MAXPLAYERS+1] = {false, ...};
-bool PlayerCachedCookie[MAXPLAYERS+1] = {false, ...};
-
-bool Debug;
-bool RemoveSprayOnBan;
 bool AllowSpraysBeforeAuthentication;
-
-Handle g_cookie;
-Handle g_adminMenu = INVALID_HANDLE;
-
-char TmpLoc[TMP_LOC_LENGTH];
-float vecTempLoc[3];
-
 bool CanViewSprayInfo[MAXPLAYERS+1];
-int DisplayType;
-bool TraceSprays;
-float TraceRate;
-float TraceDistance;
-Handle g_TraceTimer;
-float SprayLocation[MAXPLAYERS+1][3];
-char SprayerName[MAXPLAYERS+1][MAX_NAME_LENGTH];
-char SprayerID[MAXPLAYERS+1][32];
-float SprayTime[MAXPLAYERS+1];
-float vectorPos[3];
+bool Debug;
 bool lateLoad;
+bool PlayerCachedCookie[MAXPLAYERS+1] = {false, ...};
+bool PlayerCanSpray[MAXPLAYERS+1] = {false, ...};
+bool RemoveSprayOnBan;
+bool TraceSprays;
+char g_BanSprayTarget[MAXPLAYERS+1];
+char SprayerID[MAXPLAYERS+1][32];
+char SprayerName[MAXPLAYERS+1][MAX_NAME_LENGTH];
+char TmpLoc[30];
+int DisplayType;
 int SprayProtection;
 int WarnType;
-
-
+float SprayLocation[MAXPLAYERS+1][3];
+float SprayTime[MAXPLAYERS+1];
+float TraceDistance;
+float TraceRate;
+float vecTempLoc[3];
+float vectorPos[3];
+Handle g_cookie;
+Handle g_adminMenu = INVALID_HANDLE;
+Handle g_TraceTimer;
 
 public Plugin myinfo =
 {
 	name = "Banned Sprays",
-	author = "TnTSCS aka ClarkKent, X8ETr1x",
 	description = "Permanently remove a player's ability to use sprays",
+	author = "TnTSCS aka ClarkKent, X8ETr1x",
 	version = PLUGIN_VERSION,
-	url = "http://www.sourcemod.net"
-};
+	url = "https://github.com/X8ETr1x/sm-ban-player-sprays/"
+}
 
 public void OnPluginStart()
 {
 	Handle hRandom;
-	
+
 	HookConVarChange((CreateConVar("sm_bannedsprays_version", PLUGIN_VERSION, 
 	"The version of Banned Sprays", FCVAR_PLUGIN | FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD)), OnVersionChanged);
 	
@@ -194,16 +188,6 @@ public void OnLibraryRemoved(const char[] name)
 	{
 		g_adminMenu = INVALID_HANDLE;
 	}
-}
-
-/**
- * Called when your plugin is about to begin downloading an available update.
- *
- * @return		Plugin_Handled to prevent downloading, Plugin_Continue to allow it.
- */
-public Action Updater_OnPluginDownloading()
-{
-	LogMessage("...:: Ban Spray is downloading an update ::...");
 }
 
 /**
@@ -391,7 +375,7 @@ bool PlayerSprayIsBanned(int client)
 	return false;
 }
 
-public Action PlayerSpray(const char[] te_name, const char[] clients, int client_count, float delay)
+public Action PlayerSpray(const char[] te_name, const int[] Players, int numClients, float delay)
 {
 	int client = TE_ReadNum("m_nPlayer");
 	
@@ -587,6 +571,8 @@ public Action TraceAllSprays(Handle timer)
 			}
 		}
 	}
+	
+	return Plugin_Handled;
 }
 
 /**
@@ -621,7 +607,7 @@ public bool GetPlayerAimPosition(int client, float vecPos[3])
 	return false;
 }
 
-public bool TraceEntityFilterPlayer(int entity, char contentsMask)
+public bool TraceEntityFilterPlayer(int entity, int contentsMask)
 {
  	return entity > MaxClients;
 }
@@ -685,16 +671,16 @@ public void ResetVariables(int client)
  * Converts a string to a vector.
  *
  * @param str			String to convert to a vector.
- * @param vector			Vector to store the converted string to vector
+ * @param vector		Vector to store the converted string to vector
  * @return			True on success, false on failure
  */
-char StringToVector(char[] str, float vector[3])
+bool StringToVector(char str[30], float vector[3])
 {
 	char t_str[3][20];
 	
-	ReplaceString(str, TMP_LOC_LENGTH, ",", " ", false);
-	ReplaceString(str, TMP_LOC_LENGTH, ";", " ", false);
-	ReplaceString(str, TMP_LOC_LENGTH, "  ", " ", false);
+	ReplaceString(str, sizeof(str), ",", " ", false);
+	ReplaceString(str, sizeof(str), ";", " ", false);
+	ReplaceString(str, sizeof(str), "  ", " ", false);
 	TrimString(str);
 	
 	ExplodeString(str, " ", t_str, sizeof(t_str), sizeof(t_str[]));
@@ -707,12 +693,14 @@ char StringToVector(char[] str, float vector[3])
 	{
 		LogMessage("Converted string [%s] to vector [%f %f %f]", str, vector[0], vector[1], vector[2]);
 	}
+	
+	return true;
 }
 
 // ----------------------------------------------
 // --------------- COMMANDS ---------------
 // ----------------------------------------------
-public Action Command_BanSpray(int client, char args)
+public Action Command_BanSpray(int client, int args)
 {
 	if (args < 1)
 	{
@@ -740,7 +728,7 @@ public Action Command_BanSpray(int client, char args)
 	return Plugin_Handled;
 }
 
-public Action Command_BanSpraySteamID(int client, char args)
+public Action Command_BanSpraySteamID(int client, int args)
 {
 	if (args < 2)
 	{
@@ -791,7 +779,7 @@ public Action Command_BanSpraySteamID(int client, char args)
 	return Plugin_Handled;
 }
 
-public Action Command_UnBanSpray(int client, char args)
+public Action Command_UnBanSpray(int client, int args)
 {
 	if (args < 1)
 	{
@@ -814,7 +802,7 @@ public Action Command_UnBanSpray(int client, char args)
 	return Plugin_Handled;
 }
 
-public Action Command_BanSprayList(int client, char args)
+public Action Command_BanSprayList(int client, int args)
 {
 	char bannedlist[4096], count;
 	
@@ -854,7 +842,7 @@ public Action Command_BanSprayList(int client, char args)
 	return Plugin_Continue;
 }
 
-public Action Command_DeleteSpray(int client, char args)
+public Action Command_DeleteSpray(int client, int args)
 {
 	float vPos[3];
 	
@@ -1145,7 +1133,7 @@ public void Menu_StatusDisplay(Handle menu, MenuAction action, int param1, int p
  * @param ...			Variable number of format parameters.
  * @return				True on success, false if this usermessage doesn't exist.
  */
-bool Client_PrintKeyHintText(int client, const char[] format, any value)
+bool Client_PrintKeyHintText(int client, const char[] format, any ...)
 {
 	Handle userMessage = StartMessageOne("KeyHintText", client);
 	
@@ -1195,7 +1183,7 @@ public void OnAuthenticationChanged(Handle cvar, const char[] oldVal, const char
 
 public void OnTempLocChanged(Handle cvar, const char[] oldVal, const char[] newVal)
 {
-	GetConVarString(cvar, TmpLoc, TMP_LOC_LENGTH);
+	GetConVarString(cvar, TmpLoc, sizeof(TmpLoc));
 	StringToVector(TmpLoc, vecTempLoc);
 }
 
