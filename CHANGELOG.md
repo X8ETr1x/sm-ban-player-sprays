@@ -1,3 +1,9 @@
+## [0.5.3] 2026-01-28
+
+### Fixed
+
+- A bug where the Steam ID was cut off by one character.
+
 ## [0.5.2] 2026-01-28
 
 ### Changed
