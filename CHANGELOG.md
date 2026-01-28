@@ -17,13 +17,13 @@
 
 ## [0.5.0] 2026-01-27
 
-## Changed
+### Changed
 
 - Updated code to transitional syntax.
 
 ## [0.4.6] 2026-01-27
 
-## Changed
+### Changed
 
 - Cleaned up CVars for readability.
 
